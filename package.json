@@ -1,0 +1,25 @@
+{
+  "name": "mqtt2influx",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/dersimn/mqt2influx.git"
+  },
+  "author": "Simon Christmann <simon@christmann.email>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dersimn/mqt2influx/issues"
+  },
+  "homepage": "https://github.com/dersimn/mqt2influx#readme",
+  "dependencies": {
+    "influx": "^5.0.7",
+    "mqtt-smarthome-connect": "latest",
+    "yalm": "^4.1.0",
+    "yargs": "^11.0.0"
+  }
+}
