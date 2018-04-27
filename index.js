@@ -83,6 +83,7 @@ mqtt.subscribe(config.subscription, (topic, message, wildcard, packet) => {
                 if (key === 'ts')  return; // skip mqtt-smarthome specific data
                 if (key === 'lc')  return; // ..
                 if (key === 'ttl') return; // ..
+                if (typeof message[key] === 'object') return;
 
                 point.fields[key] = message[key];
             });
