@@ -98,12 +98,12 @@ mqtt.subscribe(config.subscription, (topic, message, wildcard, packet) => {
         // Provide bool transformation until InfluxDB supports type conversions
         point.fields.intValue = (point.fields.value) ? 1 : 0;
     }
-    point.measurement = topic;
+    point.measurement = Influx.escape.measurement(topic);
 
     // Write Datapoint
     influx.writePoints([point]).then(() => {
         log.debug('influx >', point.measurement);
     }).catch((err) => {
-        log.warn(err);
+        log.warn('influx >', point.measurement, err.message);
     });
 });
