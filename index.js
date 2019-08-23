@@ -76,8 +76,14 @@ mqtt.subscribe(config.subscription, (topic, message, wildcard, packet) => {
     let point = {};
     point.fields = {};
     if (typeof message === 'object') {
-        if ('val' in message) {
-            point.fields.value = message.val;
+        if (Array.isArray(message)) {
+            message.forEach((val, i) => {
+                point.fields['_'+i] = val;
+            });
+        } else {
+            if ('val' in message) {
+                point.fields.value = message.val;
+            }
             Object.keys(message).forEach(key => {
                 if (key === 'val') return; // 'val' has already been processed
                 if (key === 'ts')  return; // skip mqtt-smarthome specific data
@@ -87,10 +93,10 @@ mqtt.subscribe(config.subscription, (topic, message, wildcard, packet) => {
 
                 point.fields[key] = message[key];
             });
-        }
-        if ('ts' in message) {
-            let ts = new Date(message.ts);
-            point.timestamp = ts;
+            if ('ts' in message) {
+                let ts = new Date(message.ts);
+                point.timestamp = ts;
+            }
         }
     } else {
         point.fields.value = message;
