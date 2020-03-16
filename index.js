@@ -37,6 +37,9 @@ log.setLevel(config.verbosity);
 log.info(pkg.name + ' ' + pkg.version + ' starting');
 log.debug('loaded config: ', config);
 
+const mqttUrl = new URL(config.mqttUrl);
+log.debug('parsed mqttUrl: ', mqttUrl);
+
 const influx = new Influx.InfluxDB({
     host: config.influxHost,
     port: config.influxPort,
@@ -69,9 +72,18 @@ mqtt.on('message', (topic, message, packet) => {
         return;
     }
 
-    let point = {};
-    point.fields = {value: String(message)};
-    point.measurement = Influx.escape.measurement(topic);
+    let point = {
+        measurement: Influx.escape.measurement(topic),
+        fields: {
+            value: String(message)
+        },
+        tags: {
+            url: config.mqttUrl,
+            broker: mqttUrl.host
+        }
+    };
+    if (mqttUrl.port) point.tags.port = mqttUrl.port;
+    if (mqttUrl.username) point.tags.username = mqttUrl.username;
 
     // Write Datapoint
     influx.writePoints([point]).then(() => {
