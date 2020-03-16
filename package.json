@@ -21,5 +21,14 @@
     "mqtt": "^3.0.0",
     "yalm": "^4.1.0",
     "yargs": "^14.0.0"
+  },
+  "devDependencies": {
+    "xo": "^0.28.0"
+  },
+  "xo": {
+    "space": 4,
+    "rules": {
+      "curly": ["error", "multi-line"]
+    }
   }
 }

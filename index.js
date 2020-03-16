@@ -23,7 +23,7 @@ const config = require('yargs')
         'influx-host': '127.0.0.1',
         'influx-port': 8086,
         'influx-database': 'raw_mqtt',
-        'subscription': [
+        subscription: [
             '#'
         ]
     })
@@ -72,7 +72,7 @@ mqtt.on('message', (topic, message, packet) => {
         return;
     }
 
-    let point = {
+    const point = {
         measurement: Influx.escape.measurement(topic),
         fields: {
             value: String(message)
@@ -88,7 +88,7 @@ mqtt.on('message', (topic, message, packet) => {
     // Write Datapoint
     influx.writePoints([point]).then(() => {
         log.debug('influx >', point.measurement);
-    }).catch((err) => {
-        log.warn('influx >', point.measurement, err.message);
+    }).catch(error => {
+        log.warn('influx >', point.measurement, error.message);
     });
 });
