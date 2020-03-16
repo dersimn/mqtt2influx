@@ -18,26 +18,24 @@ const config = require('yargs')
         v: 'verbosity'
     })
     .default({
-        name: 'influx',
+        name: 'mqtt2influx',
         'mqtt-url': 'mqtt://127.0.0.1',
         'influx-host': '127.0.0.1',
         'influx-port': 8086,
-        'influx-database': 'mqtt',
+        'influx-database': 'raw_mqtt',
         'subscription': [
-            '+/status/#',
-            '+/connected',
-            '+/maintenance/#'
+            '#'
         ]
     })
     .version()
     .help('help')
     .argv;
-const MqttSmarthome = require('mqtt-smarthome-connect');
+const Mqtt = require('mqtt');
 const Influx = require('influx');
 
 log.setLevel(config.verbosity);
 log.info(pkg.name + ' ' + pkg.version + ' starting');
-log.debug("loaded config: ", config);
+log.debug('loaded config: ', config);
 
 const influx = new Influx.InfluxDB({
     host: config.influxHost,
@@ -45,66 +43,34 @@ const influx = new Influx.InfluxDB({
     database: config.influxDatabase
 });
 
-log.info('mqtt trying to connect', config.mqttUrl);
-const mqtt = new MqttSmarthome(config.mqttUrl, {
-    logger: log,
-    will: {topic: config.name + '/maintenance/online', payload: 'false', retain: true}
-});
-mqtt.connect();
+log.info('mqtt init');
+const mqtt = Mqtt.connect(config.mqttUrl);
 
 mqtt.on('connect', () => {
-    log.info('mqtt connected', config.mqttUrl);
-    mqtt.publish(config.name + '/maintenance/online', true, {retain: true});
+    log.info('mqtt connected');
+
+    config.subscription.forEach(topic => {
+        log.info('mqtt subscribe ' + topic);
+        mqtt.subscribe(topic);
+    });
 });
 
-mqtt.subscribe(config.subscription, (topic, message, wildcard, packet) => {
+mqtt.on('close', () => {
+    log.warn('mqtt closed');
+});
+
+mqtt.on('error', err => {
+    log.error('mqtt error', err.message);
+});
+
+mqtt.on('message', (topic, message, packet) => {
     if (packet.retain) {
         // Skip retained messages on start
         return;
     }
 
-    /* Process topic string
-     *     foo/status/bar -> foo//bar
-     *     var/status/foo -> $foo
-     */
-    let tpc = topic.split('/');
-    if (tpc[1] == 'status') tpc[1] = null;
-    topic = tpc.join('/');
-    topic = topic.replace('var//', '$');
-
-    // Build InfluxDB Datapoint
     let point = {};
-    point.fields = {};
-    if (typeof message === 'object') {
-        if (Array.isArray(message)) {
-            message.forEach((val, i) => {
-                point.fields['_'+i] = val;
-            });
-        } else {
-            if ('val' in message) {
-                point.fields.value = message.val;
-            }
-            Object.keys(message).forEach(key => {
-                if (key === 'val') return; // 'val' has already been processed
-                if (key === 'ts')  return; // skip mqtt-smarthome specific data
-                if (key === 'lc')  return; // ..
-                if (key === 'ttl') return; // ..
-                if (typeof message[key] === 'object') return;
-
-                point.fields[key] = message[key];
-            });
-            if ('ts' in message) {
-                let ts = new Date(message.ts);
-                point.timestamp = ts;
-            }
-        }
-    } else {
-        point.fields.value = message;
-    }
-    if (typeof point.fields.value === 'boolean') {
-        // Provide bool transformation until InfluxDB supports type conversions
-        point.fields.intValue = (point.fields.value) ? 1 : 0;
-    }
+    point.fields = {value: String(message)};
     point.measurement = Influx.escape.measurement(topic);
 
     // Write Datapoint

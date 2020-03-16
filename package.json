@@ -18,7 +18,7 @@
   "homepage": "https://github.com/dersimn/mqt2influx#readme",
   "dependencies": {
     "influx": "^5.4.0",
-    "mqtt-smarthome-connect": "latest",
+    "mqtt": "^3.0.0",
     "yalm": "^4.1.0",
     "yargs": "^14.0.0"
   }
