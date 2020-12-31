@@ -17,18 +17,21 @@
   },
   "homepage": "https://github.com/dersimn/mqt2influx#readme",
   "dependencies": {
-    "influx": "^5.4.0",
-    "mqtt": "^3.0.0",
+    "influx": "^5.6.3",
+    "mqtt": "^4.2.6",
     "yalm": "^4.1.0",
-    "yargs": "^14.0.0"
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "xo": "^0.28.0"
+    "xo": "^0.36.1"
   },
   "xo": {
     "space": 4,
     "rules": {
-      "curly": ["error", "multi-line"]
+      "curly": [
+        "error",
+        "multi-line"
+      ]
     }
   }
 }
