@@ -7,6 +7,7 @@ const config = require('yargs')
     .usage(pkg.name + ' ' + pkg.version + '\n' + pkg.description + '\n\nUsage: $0 [options]')
     .describe('verbosity', 'possible values: "error", "warn", "info", "debug"')
     .describe('mqtt-url', 'mqtt broker url. See https://github.com/mqttjs/MQTT.js#connect-using-a-url')
+    .describe('broker-name')
     .describe('influx-host')
     .describe('influx-port')
     .describe('influx-database')
@@ -79,13 +80,13 @@ mqtt.on('message', (topic, message, packet) => {
             string_value: String(message)
         },
         tags: {
-            url: config.mqttUrl,
-            broker: mqttUrl.host,
+            ...mqttUrl.host && {host: mqttUrl.host},
+            ...mqttUrl.port && {port: mqttUrl.port},
+            ...mqttUrl.username && {username: mqttUrl.username},
+            ...config.brokerName && {broker_name: config.brokerName},
             topic
         }
     };
-    if (mqttUrl.port) point.tags.port = mqttUrl.port;
-    if (mqttUrl.username) point.tags.username = mqttUrl.username;
 
     // Write Datapoint
     influx.writePoints([point]).then(() => {
