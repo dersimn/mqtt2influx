@@ -31,6 +31,9 @@
       "curly": [
         "error",
         "multi-line"
+      ],
+      "camelcase": [
+        "warn"
       ]
     }
   }

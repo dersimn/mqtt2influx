@@ -10,6 +10,7 @@ const config = require('yargs')
     .describe('influx-host')
     .describe('influx-port')
     .describe('influx-database')
+    .describe('influx-measurement')
     .describe('subscription', 'array of topics to subscribe').array('subscription')
     .alias({
         h: 'help',
@@ -22,6 +23,7 @@ const config = require('yargs')
         'influx-host': '127.0.0.1',
         'influx-port': 8086,
         'influx-database': 'raw_mqtt',
+        'influx-measurement': 'data',
         subscription: [
             '#'
         ]
@@ -72,13 +74,14 @@ mqtt.on('message', (topic, message, packet) => {
     }
 
     const point = {
-        measurement: Influx.escape.measurement(topic),
+        measurement: config.influxMeasurement,
         fields: {
-            value: String(message)
+            string_value: String(message)
         },
         tags: {
             url: config.mqttUrl,
-            broker: mqttUrl.host
+            broker: mqttUrl.host,
+            topic
         }
     };
     if (mqttUrl.port) point.tags.port = mqttUrl.port;
