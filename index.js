@@ -75,7 +75,7 @@ mqtt.on('message', (topic, message, packet) => {
     }
 
     const point = {
-        measurement: config.influxMeasurement,
+        measurement: Influx.escape.measurement(config.influxMeasurement),
         fields: {
             string_value: String(message)
         },
