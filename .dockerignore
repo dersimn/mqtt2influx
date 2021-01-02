@@ -1,0 +1,16 @@
+/node_modules
+
+
+## Git
+/.git
+/.gitignore
+
+## Docker
+Dockerfile
+/.dockerignore
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
