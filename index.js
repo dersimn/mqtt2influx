@@ -45,7 +45,23 @@ log.debug('parsed mqttUrl: ', mqttUrl);
 const influx = new Influx.InfluxDB({
     host: config.influxdbHost,
     port: config.influxdbPort,
-    database: config.influxdbDatabase
+    database: config.influxdbDatabase,
+    schema: [
+        {
+            measurement: Influx.escape.measurement(config.influxdbMeasurement),
+            fields: {
+                payload__string: Influx.FieldType.STRING
+            },
+            tags: [
+                'host',
+                'port',
+                'username',
+                'broker_name',
+                'topic',
+                'retain'
+            ]
+        }
+    ]
 });
 
 log.info('mqtt init');
