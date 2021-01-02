@@ -48,6 +48,19 @@ const influx = new Influx.InfluxDB({
     database: config.influxdbDatabase
 });
 
+// Workaround: Field type set to boolean if first written string is "true" or "false"
+influx.writePoints([{
+    measurement: Influx.escape.measurement(config.influxdbMeasurement),
+    fields: {
+        payload__string: 'dummy string'
+    },
+    timestamp: 0
+}]).then(() => {
+    log.debug('influx > dummy string');
+}).catch(error => {
+    log.warn('influx > dummy string', error.message);
+});
+
 log.info('mqtt init');
 const mqtt = Mqtt.connect(config.mqttUrl);
 
