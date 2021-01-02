@@ -69,11 +69,6 @@ mqtt.on('error', err => {
 });
 
 mqtt.on('message', (topic, message, packet) => {
-    if (packet.retain) {
-        // Skip retained messages on start
-        return;
-    }
-
     const point = {
         measurement: Influx.escape.measurement(config.influxMeasurement),
         fields: {
@@ -84,7 +79,8 @@ mqtt.on('message', (topic, message, packet) => {
             ...mqttUrl.port && {port: mqttUrl.port},
             ...mqttUrl.username && {username: mqttUrl.username},
             ...config.brokerName && {broker_name: config.brokerName},
-            topic
+            topic,
+            retain: packet.retain
         }
     };
 
